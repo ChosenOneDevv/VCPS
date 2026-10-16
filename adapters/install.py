@@ -16,7 +16,7 @@ Usage:
                [--skills name [name ...]] [--vendor-core] [--source <path>]
     install.py --adapter codex --target <repo> [--skills name [name ...]]
                [--source <path>]
-    install.py --adapter codex --global [--skills name [name ...]]
+    install.py --adapter codex|claude-code --global [--skills name [name ...]]
                [--source <path>]
     install.py --verify --adapter claude-code --target <repo> [--source <path>]
 """
@@ -297,7 +297,15 @@ def _expand_claude_skills(skills):
 def _install_plan(source, adapter, target, skills, mode, vendor_core=False, global_install=False):
     """Describe all target paths without creating directories or files."""
     actions = []
-    if adapter == "claude-code":
+    if global_install and adapter == "claude-code":
+        names = _expand_claude_skills(skills)
+        for name in names:
+            actions.append({"path": f".claude/skills/{name}", "kind": "copy",
+                            "source": f"adapters/claude-code/{name}"})
+        actions.append({"path": ".claude/UNTRUSTED-CONTENT.md", "kind": "copy",
+                        "source": "adapters/UNTRUSTED-CONTENT.md"})
+        base = Path.home()
+    elif adapter == "claude-code":
         names = _expand_claude_skills(skills)
         for name in names:
             actions.append({"path": f".claude/skills/{name}", "kind": mode,
@@ -329,7 +337,8 @@ def _install_plan(source, adapter, target, skills, mode, vendor_core=False, glob
             actions.append({"path": rel, "kind": "copy", "source": rel})
         actions.append({"path": ".agents/UNTRUSTED-CONTENT.md", "kind": "copy",
                         "source": "adapters/UNTRUSTED-CONTENT.md"})
-    manifest_rel = (".agents/vcps-install-" + adapter + ".json" if global_install
+    global_parent = ".claude" if adapter == "claude-code" else ".agents"
+    manifest_rel = (global_parent + "/vcps-install-" + adapter + ".json" if global_install
                     else ".vcps-install-" + adapter + ".json")
     actions.append({"path": manifest_rel, "kind": "manifest", "source": None})
     conflicts = []
@@ -394,8 +403,11 @@ def _safe_destination(base: Path, relative: str):
 
 
 def _manifest_path(adapter, target, global_install):
-    rel = Path(".agents") / f"vcps-install-{adapter}.json" if global_install else Path(f".vcps-install-{adapter}.json")
-    return _safe_destination(Path.home() if global_install else target, rel.as_posix())
+    if global_install:
+        parent = ".claude" if adapter == "claude-code" else ".agents"
+        rel = Path(parent) / f"vcps-install-{adapter}.json"
+        return _safe_destination(Path.home(), rel.as_posix())
+    return _safe_destination(target, f".vcps-install-{adapter}.json")
 
 
 def _manifest_managed_path(adapter, relative):
@@ -689,6 +701,18 @@ def _verify_install(source, adapter, target, skills, mode, vendor_core=False, gl
     """Verify all files currently installed by the documented copy layout."""
     if global_install:
         base = Path.home()
+        if adapter == "claude-code":
+            names = _expand_claude_skills(skills)
+            result = _verify_dirs([
+                (source / "adapters/claude-code" / name, base / ".claude/skills" / name)
+                for name in names
+            ])
+            trust_src, trust_dst = source / "adapters/UNTRUSTED-CONTENT.md", base / ".claude/UNTRUSTED-CONTENT.md"
+            result["files_checked"] += 1
+            if not trust_dst.is_file() or not filecmp.cmp(trust_src, trust_dst, shallow=False):
+                result["mismatches"].append(str(trust_dst))
+            result["ok"] = not result["mismatches"]
+            return result
         pairs = [(source / "adapters/codex" / name, base / ".agents/skills" / name) for name in skills]
         pairs += [(source / rel, base / ".agents/vcps-source" / rel)
                   for rel in ("standard", "workflows", "templates", "adapters")]
@@ -734,7 +758,7 @@ def main():
     parser.add_argument("--adapter", choices=["claude-code", "codex"], required=True)
     parser.add_argument("--target", help="target repository root to install into")
     parser.add_argument("--global", dest="global_install", action="store_true",
-                        help="codex only: install skills for this user in ~/.agents/skills")
+                        help="install skills for this user across projects")
     parser.add_argument("--source", default=None, help="VCPS repository root (default: this script's own repo)")
     parser.add_argument("--mode", choices=["copy", "symlink"], default=None)
     parser.add_argument("--skills", nargs="+", default=None,
@@ -752,9 +776,6 @@ def main():
 
     source = Path(args.source).resolve() if args.source else _repo_root_from_here()
     if args.global_install:
-        if args.adapter != "codex":
-            print(json.dumps({"error": "--global is codex only"}))
-            sys.exit(2)
         if args.target:
             print(json.dumps({"error": "--global and --target cannot be combined"}))
             sys.exit(2)
@@ -789,8 +810,8 @@ def main():
             raise ValueError("--verify cannot be combined with --plan or a lifecycle operation")
         if args.adapter == "codex" and args.vendor_core:
             raise ValueError("--vendor-core is claude-code only")
-        if args.global_install and args.adapter == "codex" and args.mode not in (None, "copy"):
-            raise ValueError("--global Codex install only supports copy mode")
+        if args.global_install and args.mode not in (None, "copy"):
+            raise ValueError("--global install only supports copy mode")
         if args.adapter == "codex" and not args.global_install and args.mode == "symlink":
             raise ValueError("codex installs only support --mode copy")
         manifest_path = _manifest_path(args.adapter, target, args.global_install)

@@ -9,8 +9,9 @@ workflow executors: `/vcps-audit` (`workflows/audit.md`), `/vcps-review`
 (`workflows/tiny.md`), `/vcps-feature` (`workflows/feature.md`),
 `/vcps-hotfix` (`workflows/hotfix.md`), and `/vcps-release`
 (`workflows/release.md`) — roadmap Phase D closed in full 2026-10-06.
-Not published, not a shipped installer — see `adapters/README.md` and
-`standard/open-questions.md` "Deliberately deferred" list.
+Installable from the public GitHub repository through the animated installer
+or `adapters/install.py`; live workflow maturity remains limited as described
+in the evaluation roadmap.
 
 - Adapter version: `0.1.0-draft.9` (this file's directory, `VERSION`)
 - VCPS Core: `1.0.0`; project schema `0.2.0`; layout `0.1.0`

@@ -33,9 +33,9 @@ relative layout documented in each adapter README.
 ## Installing an adapter
 
 For direct installation from the public GitHub repository, use
-[`QUICKSTART.md`](../QUICKSTART.md). Run its command from the target project
-to install all Codex skills into that repository, or add `--global` to make
-Codex skills available to the current OS user across projects.
+[`QUICKSTART.md`](../QUICKSTART.md). Run its terminal command for the
+animated agent and scope selector, or use `--adapter` for non-interactive
+project/user installation.
 
 `adapters/install.py` (Phase K, `evaluation/completion-roadmap.md`)
 automates the manual symlink/copy procedure each adapter README
@@ -45,6 +45,7 @@ documents, for either adapter:
 adapters/install.py --adapter claude-code --target <repo> [--mode copy|symlink] [--vendor-core]
 adapters/install.py --adapter codex --target <repo>
 adapters/install.py --adapter codex --global
+adapters/install.py --adapter claude-code --global
 ```
 
 It installs the chosen adapter's skill set (plus `vcps-audit`/
@@ -65,6 +66,10 @@ Codex can also be installed at user scope with `--global`: skills go to
 `~/.agents/vcps-source/`. This makes the skills discoverable in any
 project for that OS user; each workflow still acts on the current project
 when invoked. The installer refuses to overwrite existing global paths.
+
+Claude Code supports the same user scope: skills go to `~/.claude/skills/`
+and the shared untrusted-content policy goes to `~/.claude/`. Project-specific
+Core discovery still runs from the project where Claude Code is started.
 
 The `0.1.0`→`0.2.0` project-schema migration `templates/contract.md`
 describes in prose is mechanized as

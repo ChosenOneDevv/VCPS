@@ -25,13 +25,13 @@ VCPS is an agent-independent standard built around evidence, risk, independent r
 
 ## Quick install
 
-Run from the project you want Codex to work in. This downloads VCPS from GitHub and installs the full skill set into that project:
+Run this in a terminal. The animated installer detects Codex and Claude Code, lets you select agents and choose project-wide or user-wide installation, then verifies each install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash -s -- --adapter codex --target "$PWD"
+curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash
 ```
 
-Then invoke the router in Codex with **`$vcps`**. Start setup directly with **`$vcps-setup`**.
+For direct non-interactive installation into the current project, pass `--adapter codex --target "$PWD"`. User-wide installation targets the current OS account across projects. Then invoke the router in Codex with **`$vcps`** or in Claude Code with **`/vcps`**.
 
 For Claude Code, use:
 
@@ -44,6 +44,8 @@ To make Codex skills available across all projects for your OS user, add `--glob
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash -s -- --adapter codex --global
 ```
+
+Claude Code supports the same user-wide scope with `--adapter claude-code --global`.
 
 Install script supports `--plan` to preview and `--verify` to check an installation. It refuses to overwrite existing skill paths. For source inspection, installer options, prerequisites, and limitations, see [Quick Start](QUICKSTART.md).
 

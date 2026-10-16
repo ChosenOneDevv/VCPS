@@ -7,6 +7,7 @@ ADAPTER=""
 TARGET="${PWD}"
 TARGET_EXPLICIT=0
 GLOBAL_INSTALL=0
+TUI=0
 FORWARD_ARGS=()
 
 usage() {
@@ -14,14 +15,17 @@ usage() {
 Install VCPS directly from GitHub.
 
 Usage:
+  install.sh                         # animated interactive installer
   install.sh --adapter codex [--target PATH] [--global] [installer options]
-  install.sh --adapter claude-code [--target PATH] [installer options]
+  install.sh --adapter claude-code [--target PATH] [--global] [installer options]
+  install.sh --tui [--target PATH]
   install.sh --help
 
 Options:
   --adapter NAME  Required: codex or claude-code
   --target PATH   Project repository (defaults to current directory)
-  --global        Codex user-wide install (~/.agents/skills)
+  --global        User-wide install (Codex ~/.agents, Claude Code ~/.claude)
+  --tui           Open animated interactive installer
   --ref REF       GitHub branch or tag (defaults to main)
   --plan          Preview changes without writing
   --verify        Verify an existing install
@@ -39,6 +43,7 @@ while (($#)); do
       TARGET="$2"; TARGET_EXPLICIT=1; FORWARD_ARGS+=(--target "$2"); shift 2 ;;
     --global)
       GLOBAL_INSTALL=1; FORWARD_ARGS+=(--global); shift ;;
+    --tui) TUI=1; shift ;;
     --ref)
       (($# >= 2)) || { echo "missing value for --ref" >&2; exit 2; }
       REF="$2"; shift 2 ;;
@@ -46,12 +51,15 @@ while (($#)); do
   esac
 done
 
+if [[ -z "$ADAPTER" && -t 1 && -r /dev/tty ]]; then TUI=1; fi
+if [[ "$TUI" == 1 && -n "$ADAPTER" ]]; then
+  echo "--tui cannot be combined with --adapter" >&2; exit 2
+fi
+if [[ "$TUI" == 0 ]]; then
 [[ "$ADAPTER" == "codex" || "$ADAPTER" == "claude-code" ]] || {
   echo "choose --adapter codex or --adapter claude-code" >&2; exit 2;
 }
-[[ "$GLOBAL_INSTALL" == 0 || "$ADAPTER" == "codex" ]] || {
-  echo "--global is supported for Codex only" >&2; exit 2;
-}
+fi
 [[ "$GLOBAL_INSTALL" == 0 || "$TARGET_EXPLICIT" == 0 ]] || {
   echo "--global cannot be combined with --target" >&2; exit 2;
 }
@@ -73,6 +81,12 @@ curl --proto '=https' --tlsv1.2 --fail --location --retry 2 "$ARCHIVE_URL" \
   --output "$TMP_DIR/vcps.tar.gz"
 mkdir "$TMP_DIR/source"
 tar -xzf "$TMP_DIR/vcps.tar.gz" --strip-components=1 -C "$TMP_DIR/source"
+
+if [[ "$TUI" == 1 ]]; then
+  python3 "$TMP_DIR/source/adapters/installer_tui.py" \
+    --source "$TMP_DIR/source" --target "$TARGET"
+  exit $?
+fi
 
 if [[ "$GLOBAL_INSTALL" == 0 && "$TARGET_EXPLICIT" == 0 ]]; then
   FORWARD_ARGS+=(--target "$TARGET")

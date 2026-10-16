@@ -21,18 +21,22 @@ policy as described in [`adapters/codex/README.md`](adapters/codex/README.md).
 
 ## Install from GitHub
 
-From the target project, install all Codex skills into that project with one
-command:
+Run in a terminal to open the animated installer. It detects Codex and Claude
+Code, lets you select agents, then choose project-wide or user-wide scope:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash
+```
+
+The installer downloads VCPS over HTTPS into a temporary directory, runs the
+manifest-aware installer, removes temporary source, then verifies installed
+files. It refuses to overwrite existing paths.
+
+For direct non-interactive Codex installation into the current project:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash -s -- --adapter codex --target "$PWD"
 ```
-
-This downloads the selected VCPS source archive over HTTPS, extracts it into a
-temporary directory, runs the manifest-aware installer, then removes the
-temporary source. The project receives all nine skills in `.agents/skills/`
-plus their documented shared helper files. The installer refuses to overwrite
-existing paths and reports the result as JSON.
 
 For Claude Code:
 
@@ -45,6 +49,15 @@ For Codex availability across all projects for the current OS user:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash -s -- --adapter codex --global
 ```
+
+For Claude Code availability across the current user's projects:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ChosenOneDevv/VCPS/main/install.sh | bash -s -- --adapter claude-code --global
+```
+
+User-wide installs place Codex skills under `~/.agents/skills/` and Claude
+Code skills under `~/.claude/skills/`.
 
 Codex skills are invoked as `$vcps`, `$vcps-setup`, and the other skill names.
 Claude Code commands are invoked as `/vcps`, `/vcps-setup`, and so on. Use
@@ -59,8 +72,8 @@ For development or offline use, from a VCPS source checkout:
 python3 adapters/install.py --adapter codex --target /path/to/project
 ```
 
-For Claude Code, add `--mode copy --vendor-core`. Codex user-wide installation
-uses `--adapter codex --global` without `--target`.
+For Claude Code, add `--mode copy --vendor-core` for project installs. Use
+`--global` without `--target` for user-wide installs of either adapter.
 
 ## First run
 
