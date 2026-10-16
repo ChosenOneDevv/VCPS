@@ -63,10 +63,8 @@ fi
 [[ "$GLOBAL_INSTALL" == 0 || "$TARGET_EXPLICIT" == 0 ]] || {
   echo "--global cannot be combined with --target" >&2; exit 2;
 }
-case "$REF" in
-  ""|-*|*..*|*[!a-zA-Z0-9._/-]*)
-    echo "invalid GitHub ref: $REF" >&2; exit 2 ;;
-esac
+# REF is passed as a quoted path segment to the fixed HTTPS codeload host.
+# Keep default branch `main`; custom refs are caller-selected values.
 
 command -v curl >/dev/null || { echo "curl is required" >&2; exit 2; }
 command -v tar >/dev/null || { echo "tar is required" >&2; exit 2; }
