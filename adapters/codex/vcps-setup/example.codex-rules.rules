@@ -1,0 +1,31 @@
+# Example Codex CLI command rule for this skill's mutating subcommand.
+#
+# This file is NOT installed automatically -- Codex only loads rules
+# from <repo>/.codex/rules/ (and only once that directory's repo is
+# marked "trusted" by the operator), per
+# https://learn.chatgpt.com/docs/agent-configuration/rules (fetched
+# 2026-10-06). Copy this file's content into a .rules file under your
+# target repository's .codex/rules/ directory to recreate the Claude
+# Code adapter's "never silently pre-approve mutation" posture under
+# Codex's own, repo-wide (not skill-scoped) rule mechanism -- see
+# adapters/codex/references/capability-mapping.md's "Capability gaps"
+# section for why this is repo-wide rather than scoped to this one
+# skill, unlike the Claude Code adapter's allowed-tools.
+#
+# UNVERIFIED: exact Starlark syntax below is this adapter's best
+# reconstruction from available documentation, not confirmed against a
+# live Codex session.
+
+prefix_rule(
+    pattern = ["python3", "vcps_tool.py", "atomic-write"],
+    decision = "prompt",
+    justification = "VCPS adapter mutation -- never silently pre-approved; require explicit confirmation per write, same posture as the Claude Code adapter's own allowed-tools design.",
+)
+
+# The read-only subcommands (detect, inventory, resume-status, validate,
+# fingerprint, plan-hash) are deliberately NOT listed here with
+# decision = "allow": leaving them unlisted means they fall back to the
+# ordinary sandbox/approval_policy behavior for workspace-write +
+# on-request (auto-execute within the sandbox, since they are read-only
+# and never escape it) -- matching the Claude Code adapter's own choice
+# to pre-approve only the read-only subcommands, never the mutating one.

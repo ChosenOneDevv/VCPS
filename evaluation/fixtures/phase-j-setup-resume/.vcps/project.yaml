@@ -1,0 +1,303 @@
+schema_version: "0.2.0"
+artifact_layout_version: "0.1.0"
+vcps_version: "0.1.0-draft"
+project:
+  name: "Synthetic Commerce Evaluation Fixture"
+  description: "Synthetic L3-shaped service used exclusively for VCPS evaluation."
+level:
+  value: L3
+  rationale: "Synthetic risk profile rates financial loss and tenant isolation as dimension 3; this is fixture metadata, not a production assessment."
+  evidence_refs: []
+  lowering_approval_ref: null
+installation:
+  mode: null
+  route: ALREADY_COMPLETE
+  stage: null
+  status: COMPLETE
+  plan:
+    base_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+    mode: ADOPT
+    level: L3
+    create_paths:
+      - "VCPS.md"
+      - ".vcps/baseline.md"
+    modify_paths: []
+    intended_checks:
+      - "test"
+    likely_checkpoints: []
+    allowed_paths:
+      - ".vcps/**"
+      - "VCPS.md"
+    allowed_operations:
+      - "create"
+    max_changed_files: 10
+    max_bytes: 50000
+    max_commands: 5
+    sha256: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+  plan_history: []
+  stage_events:
+    - stage: 1
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:13:00Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: >-
+        Repository discovery (RESUME): confirms the already-recorded facts
+        in project.yaml -- a single-component Python commerce fixture
+        (commerce/), one test module (tests/test_commerce.py), one
+        utility script (tools/verify_duplicate_sku_regression.py), git
+        present, no CI config, no production deployment. This project's
+        .vcps/ state was originally seeded as a synthetic evaluation
+        fixture, not produced by a prior real Setup Engine run
+        (evaluation/completion-roadmap.md Phase J) -- this is the first
+        real Stage 1-11 execution against it.
+    - stage: 2
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:13:15Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["commerce", "tests"]
+      input_fingerprint: "61562c282abf37af5252bda8e99faab5792a50c300abb7f454695350c6cded7c"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: >-
+        Stack/toolchain discovery: confirms the already-recorded command
+        (python3 -m unittest discover -s tests -v) is the real, only
+        configured check; no lint/build/typecheck tool is configured.
+        Actually run during this stage (not assumed): 8/8 tests pass at
+        the resume revision.
+    - stage: 3
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:13:30Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["commerce", "tests"]
+      input_fingerprint: "61562c282abf37af5252bda8e99faab5792a50c300abb7f454695350c6cded7c"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: >-
+        Risk classification: confirms the already-recorded risk-model.md
+        profile (D1-D4=3, D5=2, D7=1, D9=1 -> L3) and the two ACTIVE
+        invariants in invariants.md (INV-001 tenant isolation, INV-002
+        at-most-once charge). Neither is re-derived from scratch; both
+        predate this resume and are unchanged, confirmed by the stack
+        scope fingerprint above matching across stages 2 and 3.
+    - stage: 4
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:13:45Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths:
+        - "VCPS.md"
+      reason: >-
+        VCPS scaffold: project.yaml/risk-model.md/invariants.md already
+        existed from the synthetic seed; the only remaining scaffold
+        output per the seed's own pending_artifact_refs is VCPS.md
+        (baseline.md is Stage 8's job). Mode recorded as ADOPT: this
+        installation's pre-existing substantial application content and
+        risk profile are the hallmark of an ADOPT scenario, even though
+        the original mode-selection event was never persisted by the
+        synthetic seed.
+    - stage: 5
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:14:00Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: >-
+        Dirty-tree/legacy classification: the only untracked content at
+        the resume revision is this skill's own self-contained
+        installation (.claude/skills/, .claude/UNTRUSTED-CONTENT.md) and
+        vendored Core copy (.vcps-core/, via adapters/install.py
+        --vendor-core) -- clear, attributable purpose, not an HC-07
+        trigger. BUG-00000000-0000-4000-8000-000000000002,
+        FEAT-00000000-0000-4000-8000-000000000001, and their GATE
+        records are pre-existing canonical .vcps/ content from earlier
+        BUG/FEATURE workflow runs, not dirty-tree findings -- they are
+        explicitly out of this setup resume's scope. No disabled tests,
+        no dead code, no pending migrations found.
+    - stage: 6
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:14:15Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["commerce", "tests"]
+      input_fingerprint: "61562c282abf37af5252bda8e99faab5792a50c300abb7f454695350c6cded7c"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: ["EVD-8e8bb3c0-5335-4a30-9458-f21f432fea10"]
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: >-
+        Baseline verification: python3 -m unittest discover -s tests -v
+        actually run (not assumed); 8/8 PASS at the resume revision.
+        E2 LOCAL only -- no hosted CI exists (see Stage 9).
+    - stage: 7
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:14:30Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["commerce", "tests"]
+      input_fingerprint: "61562c282abf37af5252bda8e99faab5792a50c300abb7f454695350c6cded7c"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "No locally actionable remediation needed: the only check already passes cleanly."
+    - stage: 8
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:14:45Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: ["EVD-8e8bb3c0-5335-4a30-9458-f21f432fea10"]
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: [".vcps/baseline.md"]
+      reason: "Baseline established at 30e28e73dd75dce4737173d77e63d29a5a5282c1."
+    - stage: 9
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:15:00Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: ["FND-5ed8b1b2-2b5a-41f0-8df1-94287d034ec2"]
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths:
+        - ".vcps/findings/FND-5ed8b1b2-2b5a-41f0-8df1-94287d034ec2.md"
+      reason: >-
+        Legacy evidence-gap registry: FND-5ed8b1b2 (no CI, HIGH at L3 per
+        VCPS-LVL-010) recorded OPEN with an owner and a touch rule
+        covering effectively every file in the project, per
+        VCPS-SETUP-022.
+    - stage: 10
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:15:15Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "CI quality-gate alignment: no CI exists; recorded as the same EVIDENCE_GAP (FND-5ed8b1b2), no new finding duplicated."
+    - stage: 11
+      event_state: COMPLETED
+      timestamp: "2026-10-07T08:15:30Z"
+      input_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      input_scope: ["."]
+      input_fingerprint: "fbc567162a9e947f0b78d4afa3ec403d2c9a5d0a6c9a4774fb0b5519dded14c7"
+      output_revision: "30e28e73dd75dce4737173d77e63d29a5a5282c1"
+      plan_hash: "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: >-
+        VCPS system audit: config consistent, artifact cross-references
+        resolve (EVD-8e8bb3c0 <- baseline.md/project.yaml, FND-5ed8b1b2
+        <- project.yaml legacy registry), no orphaned findings among
+        this stage's own outputs. Pre-existing BUG-...0002/FEAT-...0001
+        records and their gates are independently tracked by their own
+        workflows and are not re-audited here. SETUP_STATUS: COMPLETE.
+  history:
+    - timestamp: "2026-10-07T08:15:30Z"
+      from_status: PARTIAL
+      to_status: COMPLETE
+      from_stage: 1
+      to_stage: null
+      reason: >-
+        RESUME completed: the synthetic seed left status PARTIAL at
+        stage 1 with stage_events empty; this is the first real Setup
+        Engine execution against this project, completing all eleven
+        stages in one interactive session.
+  pending_artifact_refs: []
+repository:
+  vcs: git
+  remote: null
+  default_branch: "vcps-phase-j"
+stack:
+  languages: [python]
+  frameworks: [unittest]
+  package_managers: []
+commands:
+  - id: test
+    purpose: "Run synthetic commerce invariant tests."
+    working_directory: "."
+    command: "python3 -m unittest discover -s tests -v"
+ci:
+  present: false
+  provider: null
+  config_paths: []
+  job_gate_map: []
+critical_domains:
+  - domain: financial-ledger
+    rationale: "Order totals and payment settlement determine money-relevant state."
+    impact_dimensions: [D1, D2]
+  - domain: tenant-isolation
+    rationale: "Tenant ID scopes product and order lookup paths."
+    impact_dimensions: [D3, D4]
+  - domain: inventory-integrity
+    rationale: "Order creation reserves authoritative stock."
+    impact_dimensions: [D1]
+  - domain: external-payment-callbacks
+    rationale: "Webhook signature and duplicate-event handling govern settlement."
+    impact_dimensions: [D2, D3]
+applicable_invariants:
+  - INV-001
+  - INV-002
+evidence_policy: {}
+baseline_ref: ".vcps/baseline.md"
+config_history:
+  - timestamp: "2026-10-07T08:15:30Z"
+    event: "RESUME completed: scaffold finished (VCPS.md), baseline established"
+    from: "status PARTIAL, stage 1, no stage_events"
+    to: "status COMPLETE, stage null, 11 stage_events"
+    reason: "First real Setup Engine execution against this project's previously-seeded synthetic .vcps/ state."
+lifecycle:
+  default_observation_window_days: null
+  notes: "No production observation claim; fixture only."

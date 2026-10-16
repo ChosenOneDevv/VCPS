@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/gate.schema.json",
+  "title": "VCPS gate evaluation record",
+  "description": "Structural schema for .vcps/gates/GATE-*.md frontmatter. Owned in content by standard/gates/README.md SS6 (VCPS-GATE-050). NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "id", "gate", "revision", "change_class",
+    "project_level", "outcome", "evidence_refs", "finding_refs",
+    "checkpoint_refs", "evaluator", "supersedes_ref"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^GATE-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "gate": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 6
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The exact evaluated revision (VCPS-GATE-030: Gates 4/5 MUST be on a recorded revision)."
+    },
+    "change_class": {
+      "type": ["string", "null"],
+      "enum": ["R0", "R1", "R2", "R3", null],
+      "description": "Null only for SETUP or read-only AUDIT scope, per templates/contract.md ('SETUP and read-only AUDIT MUST record their scope rather than invent a change class'). This is an immutable evaluation snapshot (VCPS-CORE ownership table), not the work item's current class."
+    },
+    "scope_description": {
+      "type": "string",
+      "description": "Required when change_class is null: what was actually evaluated (a SETUP stage, an AUDIT boundary) instead of a change."
+    },
+    "project_level": {
+      "enum": ["L1", "L2", "L3"],
+      "description": "Immutable evaluation-time snapshot; current level is owned by project.yaml."
+    },
+    "outcome": {
+      "enum": ["PASS", "PARTIAL", "BLOCKED", "NOT_APPLICABLE", "NOT_EVALUATED"]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "enum": ["DEFECT", "EVIDENCE", "DECISION", "DEPENDENCY"] },
+      "description": "Required, non-empty, when outcome is BLOCKED (gates/README.md SS2)."
+    },
+    "partial_gap": {
+      "type": "string",
+      "description": "Required when outcome is PARTIAL: the explicitly recorded gap (VCPS-GATE-010)."
+    },
+    "applicability_basis": {
+      "type": "string",
+      "description": "Required when outcome is NOT_APPLICABLE: the matrix row and facts that make it apply (VCPS-GATE-002)."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "finding_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "checkpoint_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^HCR-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "independence_mode": {
+      "type": ["string", "null"],
+      "enum": ["I0", "I1", "I2", "I3", "I4", null],
+      "description": "Required (non-null) for Gates 4 and 5 (VCPS-GATE-050, independence.md SS3); null for Gates 1/2/3/6."
+    },
+    "evaluator": { "$ref": "#/$defs/identity" },
+    "supersedes_ref": {
+      "type": ["string", "null"],
+      "pattern": "^GATE-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Link to the prior evaluation of the same change/gate this one supersedes, if any (VCPS-GATE-031)."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "BLOCKED" } }, "required": ["outcome"] },
+      "then": { "required": ["reason_codes"], "properties": { "reason_codes": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "PARTIAL" } }, "required": ["outcome"] },
+      "then": { "required": ["partial_gap"] }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "NOT_APPLICABLE" } }, "required": ["outcome"] },
+      "then": { "required": ["applicability_basis"] }
+    },
+    {
+      "if": { "properties": { "gate": { "enum": [4, 5] } }, "required": ["gate"] },
+      "then": { "properties": { "independence_mode": { "not": { "const": null } } } }
+    },
+    {
+      "if": { "properties": { "change_class": { "const": null } }, "required": ["change_class"] },
+      "then": { "required": ["scope_description"] }
+    }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role": { "enum": ["human", "agent"] },
+        "identity": { "type": "string" }
+      }
+    }
+  }
+}

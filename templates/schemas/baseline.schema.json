@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/baseline.schema.json",
+  "title": "VCPS baseline",
+  "description": "Structural schema for .vcps/baseline.md frontmatter. Owned in content by workflows/setup.md Stage 6/8 (VCPS-SETUP-018/021/027) and templates/contract.md's baseline.md field list. NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "revision", "date", "observations",
+    "inherited_finding_refs", "environment_limitations", "history"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "revision": {
+      "$ref": "#/$defs/revision"
+    },
+    "date": { "type": "string", "format": "date" },
+    "observations": {
+      "type": "array",
+      "description": "VCPS-SETUP-027: the original observations array is immutable after establishment. Widening or resolving happens only via `history`, never by editing this array in place.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "check_id", "result", "evidence_ref"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^BLO-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "check_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "References a command ID from project.yaml.commands."
+          },
+          "result": {
+            "enum": ["PASS", "FAIL", "NOT_RUN", "ERROR", "INCONCLUSIVE"]
+          },
+          "evidence_ref": {
+            "type": "string",
+            "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "finding_ref": {
+            "type": ["string", "null"],
+            "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "description": "Required (non-null) when result is not PASS (workflows/setup.md VCPS-SETUP-042: every non-PASS baseline result MUST have a linked finding)."
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "result": { "const": "PASS" } }, "required": ["result"] },
+            "then": {},
+            "else": { "properties": { "finding_ref": { "not": { "const": null } } } }
+          }
+        ]
+      }
+    },
+    "inherited_finding_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "environment_limitations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "history": {
+      "type": "array",
+      "description": "Append-only. Per VCPS-SETUP-027, each entry is either ADD_OBSERVATION (widening) or RESOLVE_OBSERVATION (append a resolution referencing an existing BLO id and a RESOLVED finding). Neither changes `observations` above.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "timestamp", "reason"],
+        "properties": {
+          "type": { "enum": ["ADD_OBSERVATION", "RESOLVE_OBSERVATION"] },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string", "minLength": 1 },
+          "new_observation": {
+            "description": "Required when type is ADD_OBSERVATION: the new BLO entry being added, same shape as an `observations` item.",
+            "type": "object"
+          },
+          "observation_id": {
+            "type": "string",
+            "pattern": "^BLO-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "description": "Required when type is RESOLVE_OBSERVATION: the existing observation id being resolved."
+          },
+          "resolution_finding_ref": {
+            "type": "string",
+            "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "description": "Required when type is RESOLVE_OBSERVATION: the RESOLVED finding whose remediation evidence justifies this resolution."
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "ADD_OBSERVATION" } }, "required": ["type"] },
+            "then": { "required": ["new_observation"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "RESOLVE_OBSERVATION" } }, "required": ["type"] },
+            "then": { "required": ["observation_id", "resolution_finding_ref"] }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "revision": {
+      "oneOf": [
+        { "type": "string", "minLength": 7 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["base_commit_hash", "dirty", "manifest_hash"],
+          "properties": {
+            "base_commit_hash": { "type": "string", "minLength": 7 },
+            "dirty": { "const": true },
+            "manifest_hash": { "type": "string" },
+            "manifest_ref": { "type": "string" }
+          }
+        }
+      ]
+    }
+  }
+}

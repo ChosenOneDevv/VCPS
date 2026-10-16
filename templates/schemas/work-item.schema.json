@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/work-item.schema.json",
+  "title": "VCPS work item (FEATURE, REVIEW, BUG, RELEASE, TINY, HOTFIX, AUDIT)",
+  "description": "Structural schema shared by .vcps/features/FEAT-*.md, .vcps/reviews/REV-*.md, .vcps/bugs/BUG-*.md, .vcps/releases/REL-*.md, and .vcps/work-items/WORK-*.md (TINY/HOTFIX/AUDIT), per templates/contract.md: 'One work-item schema covers FEATURE, REVIEW, BUG, RELEASE, TINY, HOTFIX, AUDIT.' NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "id", "intent", "title", "scope", "risk_class",
+    "applicable_gates", "affected_invariants", "evidence_refs",
+    "finding_refs", "checkpoint_refs", "acceptance", "history"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "description": "FEAT- for FEATURE, REV- for REVIEW, BUG- for BUG, REL- for RELEASE, WORK- for TINY/HOTFIX/AUDIT (templates/contract.md ID prefix list).",
+      "pattern": "^(FEAT|REV|BUG|REL|WORK)-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "intent": {
+      "enum": ["FEATURE", "REVIEW", "BUG", "RELEASE", "TINY", "HOTFIX", "AUDIT"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component_ref", "level"],
+      "properties": {
+        "component_ref": {
+          "type": ["string", "null"],
+          "description": "Component identifier from risk-model.md, or null for project-wide scope."
+        },
+        "level": {
+          "enum": ["L1", "L2", "L3"],
+          "description": "The component/project level reference at the time this work item was classified."
+        },
+        "files": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "risk_class": {
+      "type": ["string", "null"],
+      "enum": ["R0", "R1", "R2", "R3", null],
+      "description": "Required for a change-making intent (FEATURE/BUG/TINY/HOTFIX). Null is valid for REVIEW (until it proposes a change) and AUDIT (always read-only, VCPS-WF and templates/validation.md item 8: 'AUDIT cannot claim implementation gate outcomes'). RELEASE records the highest class among its included changes."
+    },
+    "applicable_gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gate", "outcome_ref"],
+        "properties": {
+          "gate": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "outcome_ref": {
+            "type": ["string", "null"],
+            "pattern": "^GATE-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      }
+    },
+    "affected_invariants": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^INV-[0-9]{3,}$" }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "finding_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "checkpoint_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(HCR|PREAUTH)-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "lifecycle_state": {
+      "enum": ["PROPOSED", "SPECIFIED", "CODED", "VERIFIED", "ACCEPTED", "PRODUCTION_PROVEN", "WITHDRAWN"],
+      "description": "Required, and only meaningful, when intent is FEATURE (lifecycle.md SS1). Other intents use workflow_state instead."
+    },
+    "workflow_state": {
+      "enum": ["OPEN", "IN_PROGRESS", "BLOCKED", "DONE", "WITHDRAWN"],
+      "description": "Required when intent is not FEATURE. FEATURE uses lifecycle_state instead, which carries the Core-defined state machine; this is a simpler generic progress marker for the other six intents, which have no equivalently detailed Core-owned state machine of their own."
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "decision_ref"],
+      "properties": {
+        "state": {
+          "enum": ["PENDING", "APPROVED", "REJECTED", "APPROVED_WITH_CONDITIONS"],
+          "description": "templates/contract.md: a derived projection. PENDING until decision_ref exists, then equal to that decision."
+        },
+        "decision_ref": {
+          "type": ["string", "null"],
+          "pattern": "^HCR-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "PENDING" } }, "required": ["state"] },
+          "then": { "properties": { "decision_ref": { "const": null } } }
+        },
+        {
+          "if": {
+            "properties": { "state": { "not": { "const": "PENDING" } } },
+            "required": ["state"]
+          },
+          "then": { "properties": { "decision_ref": { "not": { "const": null } } } }
+        }
+      ]
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "reason"],
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "from_state": { "type": "string" },
+          "to_state": { "type": "string" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "statement"],
+        "properties": {
+          "id": { "type": "string" },
+          "statement": { "type": "string", "minLength": 1 }
+        }
+      },
+      "description": "Required (non-empty) when intent is FEATURE (lifecycle.md ACCEPTED transition: an E4 acceptance record references each criterion)."
+    },
+    "success_signals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "FEATURE only: observable signals of PRODUCTION_PROVEN success."
+    },
+    "observation_window": {
+      "type": ["string", "integer", "null"],
+      "description": "FEATURE only: the window (e.g. days, or a free-text description) over which success_signals are observed before PRODUCTION_PROVEN. standard/open-questions.md OQ-008 leaves any default window undefined; this field carries a per-feature value, not a project default."
+    },
+    "defect_ref": {
+      "type": "string",
+      "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Required when intent is BUG: the finding record for the defect this work item fixes."
+    },
+    "intent_sources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Required (non-empty) when intent is REVIEW: what REVIEW reconstructed intended behavior from (design docs, prior features, specifications)."
+    },
+    "included_changes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Required when intent is RELEASE: the work-item/feature IDs included in this release unit."
+    },
+    "release_revision": {
+      "type": "string",
+      "description": "Required when intent is RELEASE: the exact revision being released."
+    },
+    "gate6_ref": {
+      "type": ["string", "null"],
+      "pattern": "^GATE-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Required KEY (present) when intent is RELEASE, but the VALUE is null until Gate 6 has actually been evaluated (gates/README.md VCPS-GATE-021) -- a RELEASE record legitimately exists and is BLOCKED before that happens; this field MUST NOT be fabricated to point at a Gate 6 PASS the release has not received."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "intent": { "const": "FEATURE" } }, "required": ["intent"] },
+      "then": { "required": ["lifecycle_state", "criteria"] }
+    },
+    {
+      "if": {
+        "properties": { "intent": { "not": { "const": "FEATURE" } } },
+        "required": ["intent"]
+      },
+      "then": { "required": ["workflow_state"] }
+    },
+    {
+      "if": { "properties": { "intent": { "const": "BUG" } }, "required": ["intent"] },
+      "then": { "required": ["defect_ref"] }
+    },
+    {
+      "if": { "properties": { "intent": { "const": "REVIEW" } }, "required": ["intent"] },
+      "then": { "required": ["intent_sources"] }
+    },
+    {
+      "if": { "properties": { "intent": { "const": "RELEASE" } }, "required": ["intent"] },
+      "then": { "required": ["included_changes", "release_revision", "gate6_ref"] }
+    },
+    {
+      "if": { "properties": { "intent": { "const": "AUDIT" } }, "required": ["intent"] },
+      "then": { "properties": { "risk_class": { "const": null } } }
+    }
+  ]
+}

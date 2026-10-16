@@ -1,0 +1,279 @@
+# Worked example: a small shared household todo-list app ("todo-cli"),
+# adopted into VCPS at L2. NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06
+# as a fresh illustrative example (the original worked example was lost to
+# repository corruption and is not recovered) -- see
+# evaluation/completion-roadmap.md Phase B and templates/examples/README.md
+# for the full narrative and provenance.
+#
+# All revisions, hashes, and identities in this example are fictitious.
+# The installation.plan.sha256 below is real: it was computed by running
+# this exact plan object (minus sha256) through
+# adapters/claude-code/vcps-setup/scripts/vcps_tool.py plan-hash, so a
+# reader can reproduce it. stage_events[].input_fingerprint values are
+# illustrative placeholders (sha256 of a descriptive label), not a live
+# recomputation against a real filesystem -- there is no real todo-cli
+# checkout backing this example.
+schema_version: "0.2.0"
+artifact_layout_version: "0.1.0"
+vcps_version: "0.1.0-draft"
+project:
+  name: "todo-cli (worked example)"
+  description: >-
+    A small shared household todo-list CLI with background sync between
+    devices. Illustrative only.
+level:
+  value: L2
+  rationale: >-
+    risk-model.md profile PROJECT rates D1 (data integrity) at 2: a
+    background-sync defect can silently revert a completed item to
+    incomplete, an authoritative-record loss (VCPS-RISK-020). The system
+    is also used by people other than its builders with persistent data,
+    independently implying at least L2.
+  evidence_refs:
+    - EVD-00000000-0000-4000-8000-000000000002
+  lowering_approval_ref: null
+installation:
+  mode: null
+  route: ALREADY_COMPLETE
+  stage: null
+  status: COMPLETE
+  plan:
+    base_revision: "3f1a9c0e2b7d"
+    mode: ADOPT
+    level: L2
+    create_paths:
+      - ".vcps/project.yaml"
+      - ".vcps/risk-model.md"
+      - ".vcps/invariants.md"
+      - ".vcps/baseline.md"
+      - "VCPS.md"
+    modify_paths: []
+    intended_checks:
+      - "test"
+      - "lint"
+    likely_checkpoints:
+      - "HC-07"
+    allowed_paths:
+      - ".vcps/**"
+      - "VCPS.md"
+    allowed_operations:
+      - "create"
+    max_changed_files: 10
+    max_bytes: 200000
+    max_commands: 5
+    sha256: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+  plan_history: []
+  stage_events:
+    - stage: 1
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:00:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["."]
+      input_fingerprint: "27580e9304b3d29d3e76d0eef6c630d1d7a3cf0eb45c4eb19c0cb6effbdff7a5"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "Repository discovery: single-component Node.js CLI, no CI, git present."
+    - stage: 2
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:05:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["package.json"]
+      input_fingerprint: "dfb51878ddd5a797ec3ce72ec36a640415b819ff50c0088017b9b523c21f99eb"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: ["EVD-00000000-0000-4000-8000-000000000002"]
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "Stack/toolchain discovery: node:test for tests, eslint for lint; no build/typecheck step for this plain-JS CLI."
+    - stage: 3
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:10:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["src/sync.js", "src/devices.js"]
+      input_fingerprint: "72ed2c517f890a5cdce18b88df9e0bbd9bbb1eb750249a8423d7b074b594c971"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: ["EVD-00000000-0000-4000-8000-000000000002"]
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "Risk classification per risk-model.md: D1=2 (sync data loss), D7=1 (small household blast radius) -> L2. Drafted INV-001."
+    - stage: 4
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:15:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["."]
+      input_fingerprint: "bd5eaf821388671cca4489b3ce0fc822394f2da3cbec308197102035fd8a8866"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths:
+        - ".vcps/project.yaml"
+        - ".vcps/risk-model.md"
+        - ".vcps/invariants.md"
+        - "VCPS.md"
+      reason: "VCPS scaffold created per the plan above."
+    - stage: 5
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:20:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["."]
+      input_fingerprint: "4221cfb5bacf322aaa898b9912390cb79b5caad7da736dba068b13466e2cec08"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: ["FND-00000000-0000-4000-8000-000000000001"]
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "Dirty-tree/legacy classification: clean worktree at adopt revision, no unexplained files; absence of CI recorded as legacy EVIDENCE_GAP FND-001."
+    - stage: 6
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:25:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["."]
+      input_fingerprint: "b9ede273b444f6d9a21e3a467700e3b8566f50dfccb7cc4859c39b50f34d683b"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: ["EVD-00000000-0000-4000-8000-000000000002"]
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "Baseline verification: node --test and eslint both run (E2 LOCAL); both PASS at adopt revision."
+    - stage: 7
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:30:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: []
+      input_fingerprint: "c76b2aa40a6bd0bbf88771c8658ede593f5136dde6b6048557b290192048ba8c"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "No locally actionable remediation needed: both checks already pass cleanly."
+    - stage: 8
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:35:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["."]
+      input_fingerprint: "7fb9fb2ede497c1c77e4114b8d0a5952e8556849f2bca1f4b37e12c2273f8515"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: ["EVD-00000000-0000-4000-8000-000000000002"]
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: [".vcps/baseline.md"]
+      reason: "Baseline established at 3f1a9c0e2b7d."
+    - stage: 9
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:40:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: []
+      input_fingerprint: "3a5548d53632b044b842e30b94da8ca1e7bd5f97b9cea90f7ed8544f48d9ce03"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: ["FND-00000000-0000-4000-8000-000000000001"]
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "Legacy evidence-gap registry: FND-001 (no CI) recorded OPEN with touch rule, per VCPS-SETUP-022."
+    - stage: 10
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:45:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: []
+      input_fingerprint: "a86cacd58e2eb3172d273547d8b9c0ce00e07413a0d6009062d6ccc111c9397b"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "CI quality-gate alignment: no CI exists; recorded as the same EVIDENCE_GAP (FND-001), no new finding duplicated."
+    - stage: 11
+      event_state: COMPLETED
+      timestamp: "2026-08-03T09:50:00Z"
+      input_revision: "3f1a9c0e2b7d"
+      input_scope: ["."]
+      input_fingerprint: "f9c8c81988f5968dfd182bd1832eb5ad3b32fc5a93c7550de7d2b35ab426a561"
+      output_revision: "3f1a9c0e2b7d"
+      plan_hash: "9a8dbc2828e4d5240be65edbf75a98fdc614ebf6c71e9aea991e8d625ffe4426"
+      evidence_refs: []
+      finding_refs: []
+      approval_refs: []
+      pending_checkpoints: []
+      mutation_paths: []
+      reason: "VCPS system audit: config consistent, artifact cross-references resolve, no orphaned findings. SETUP_STATUS: COMPLETE."
+  history:
+    - timestamp: "2026-08-03T09:50:00Z"
+      from_status: PARTIAL
+      to_status: COMPLETE
+      from_stage: 1
+      to_stage: null
+      reason: "All eleven ADOPT stages completed with no pending checkpoint and no unresolved setup evidence gap."
+  pending_artifact_refs: []
+repository:
+  vcs: git
+  remote: null
+  default_branch: "main"
+stack:
+  languages: ["javascript"]
+  frameworks: ["node:test"]
+  package_managers: ["npm"]
+commands:
+  - id: "test"
+    purpose: "Run unit tests"
+    working_directory: "."
+    command: "node --test"
+  - id: "lint"
+    purpose: "Lint source"
+    working_directory: "."
+    command: "eslint src"
+ci:
+  present: false
+  provider: null
+  config_paths: []
+  job_gate_map: []
+critical_domains:
+  - domain: "sync / data integrity"
+    rationale: >-
+      Background sync reconciles per-device state for a shared household
+      todo list; the timestamp-tiebreak logic in src/sync.js can silently
+      revert a completed item to incomplete (traced impact path, not a
+      keyword match -- VCPS-RISK-002).
+    impact_dimensions: ["D1", "D7"]
+applicable_invariants:
+  - "INV-001"
+evidence_policy:
+  minimum_tier_overrides: {}
+baseline_ref: ".vcps/baseline.md"
+config_history:
+  - timestamp: "2026-08-03T09:15:00Z"
+    event: "ADOPT scaffold created"
+    from: null
+    to: "schema_version 0.2.0, layout 0.1.0"
+    reason: "Initial VCPS ADOPT setup run, Stage 4."
+lifecycle:
+  default_observation_window_days: 14
+  notes: >-
+    Project-local default only (standard/open-questions.md OQ-008 leaves
+    any Core-mandated default undefined); individual features may set
+    their own observation_window instead.

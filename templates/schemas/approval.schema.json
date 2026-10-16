@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/approval.schema.json",
+  "title": "VCPS approval record (checkpoint decision or pre-authorization)",
+  "description": "Structural schema for .vcps/approvals/HCR-*.md and .vcps/approvals/PREAUTH-*.md frontmatter. Owned in content by standard/human-checkpoints.md SS3-4 (VCPS-HC-020, VCPS-HC-030/031). NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "kind", "checkpoint_codes", "human_actor", "timestamp"],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^(HCR|PREAUTH)-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "kind": { "enum": ["DECISION", "PRE_AUTHORIZATION"] },
+    "checkpoint_codes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "pattern": "^HC-(0[1-9]|1[0-6])$"
+      },
+      "description": "VCPS-HC-002: every applicable checkpoint, not only the first recognized."
+    },
+    "human_actor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "VCPS-HC-021: only a human actor may record a decision or pre-authorization. An agent identity here is invalid."
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "action": {
+      "type": "string",
+      "description": "The exact action being decided/authorized (VCPS-HC-010/VCPS-HC-004 scope binding)."
+    },
+    "scope": {
+      "type": "string",
+      "description": "The exact scope this decision/authorization covers. Required for both kinds."
+    },
+    "revision": {
+      "type": ["string", "null"],
+      "description": "Revision this decision is bound to, where applicable (VCPS-HC-004). Null only when the checkpoint is not revision-specific."
+    },
+    "related_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Related work-item/gate/finding IDs."
+    },
+    "decision": {
+      "enum": ["APPROVED", "REJECTED", "APPROVED_WITH_CONDITIONS"],
+      "description": "Required when kind is DECISION. Never set by an agent (VCPS-HC-021)."
+    },
+    "conditions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Required, non-empty, when decision is APPROVED_WITH_CONDITIONS."
+    },
+    "max_impact": {
+      "type": "string",
+      "description": "Required when kind is PRE_AUTHORIZATION (VCPS-HC-030): the recorded maximum impact bound."
+    },
+    "expiry": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Optional expiry for a pre-authorization (VCPS-HC-030)."
+    },
+    "reuse_permission": {
+      "type": "string",
+      "description": "What matching future actions this pre-authorization covers without a fresh synchronous decision."
+    },
+    "deferral_follow_up": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "deadline"],
+      "properties": {
+        "owner": { "type": "string", "minLength": 1 },
+        "deadline": { "type": "string", "format": "date-time" }
+      },
+      "description": "workflows/hotfix.md VCPS-WF-HOTFIX-001: for an HC-16 gate-requirement deferral, the follow-up commitment (owner + deadline) that MUST be recorded alongside it. Not schema-required here (checking 'checkpoint_codes contains HC-16' is beyond this repository's JSON Schema subset validator's keyword support) -- its absence on an HC-16 decision is instead flagged by adapters/claude-code/lib/vcps_evidence.py's lapsed-deferral-check as a candidate issue. Per VCPS-WF-HOTFIX-003, a lapsed (deadline-passed) deferral is not tracked here as 'resolved' by editing this record (AG-011 forbids editing a decision record to misstate what happened) -- resolution is a separate, later record; this field only ever records the original commitment."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "DECISION" } }, "required": ["kind"] },
+      "then": { "required": ["decision", "action", "scope"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": { "const": "DECISION" },
+          "decision": { "const": "APPROVED_WITH_CONDITIONS" }
+        },
+        "required": ["kind", "decision"]
+      },
+      "then": { "required": ["conditions"], "properties": { "conditions": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "PRE_AUTHORIZATION" } }, "required": ["kind"] },
+      "then": {
+        "required": ["scope", "max_impact"],
+        "properties": {
+          "checkpoint_codes": {
+            "items": {
+              "description": "VCPS-HC-031: pre-authorization MUST NOT cover HC-04 (on protected branches -- not structurally distinguishable here, see note below), HC-06, HC-08, HC-10, HC-14, or HC-16 under any circumstance.",
+              "not": { "enum": ["HC-06", "HC-08", "HC-10", "HC-14", "HC-16"] }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

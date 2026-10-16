@@ -1,0 +1,20 @@
+# Manual-invocation-only control for this skill, per
+# https://learn.chatgpt.com/docs/build-skills (fetched 2026-10-06):
+# "The agents/openai.yaml metadata file supports an invocation control:
+# policy: allow_implicit_invocation: false. When set to false, Codex
+# won't implicitly invoke the skill based on user prompt; explicit
+# $skill invocation still works."
+#
+# This mirrors the Claude Code adapter's own vcps-setup SKILL.md
+# frontmatter choice (`disable-model-invocation: true`): this is a
+# reference/development-phase skill with no live-run evidence, and a
+# mutating workflow should not self-trigger from an ordinary user
+# message.
+#
+# UNVERIFIED: this file's exact name and location (sibling to SKILL.md,
+# inside this skill's own directory) is this adapter's best-documented
+# understanding, not confirmed against a live Codex session -- see
+# adapters/codex/references/capability-mapping.md's row for this
+# control and evaluation/codex-adapter.md's Known Limitations.
+policy:
+  allow_implicit_invocation: false

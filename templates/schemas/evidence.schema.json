@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/evidence.schema.json",
+  "title": "VCPS evidence record",
+  "description": "Structural schema for .vcps/evidence/EVD-*.md frontmatter. Owned in content by standard/evidence-model.md SS4 (VCPS-EVD-030). This file is a NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06 from the intact Core text, not a recovery of any prior schema bytes -- see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "id", "tier", "result", "assertion", "method",
+    "environment", "revision", "scope", "producer", "verifier",
+    "timestamp", "artifacts", "substitutions", "limitations", "related",
+    "corrections"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "tier": { "enum": ["E0", "E1", "E2", "E3", "E4", "E5"] },
+    "result": {
+      "enum": ["PASS", "FAIL", "NOT_RUN", "ERROR", "INCONCLUSIVE"]
+    },
+    "assertion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The precise, falsifiable statement being evaluated (glossary.md 'Assertion')."
+    },
+    "method": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Command, test identifier, procedure, or inspection method. Executable evidence (E2+) MUST include a reproduction command or procedure (VCPS-EVD-030)."
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["local", "ci", "sandbox", "production", "other"]
+        },
+        "runtime_versions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "revision": {
+      "$ref": "#/$defs/revision"
+    },
+    "scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Repository-relative files/components/paths the assertion is actually about."
+    },
+    "producer": { "$ref": "#/$defs/identity" },
+    "verifier": { "$ref": "#/$defs/identity" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["locator", "type"],
+        "properties": {
+          "locator": { "type": "string", "minLength": 1 },
+          "type": { "enum": ["repository_file", "external"] },
+          "summary": {
+            "type": "string",
+            "description": "Required (VCPS-PORTABILITY-004) when type is external and this evidence backs a gate/lifecycle promotion: a durable excerpt so the record stays interpretable if the external locator becomes unreachable."
+          },
+          "hash": { "type": "string" }
+        }
+      }
+    },
+    "substitutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["substitute", "proves", "does_not_prove"],
+        "properties": {
+          "substitute": {
+            "type": "string",
+            "description": "E.g. 'mock payment provider', 'PGlite', 'embedded emulator'."
+          },
+          "proves": { "type": "string" },
+          "does_not_prove": {
+            "type": "string",
+            "description": "Per VCPS-EVD-021/VCPS-LVL-020/021: what this substitute cannot be used to prove about the real target."
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "related": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Other evidence/finding/gate record IDs this bears on."
+    },
+    "corrections": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "supersedes_ref": {
+          "type": ["string", "null"],
+          "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "superseded_by_ref": {
+          "type": ["string", "null"],
+          "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      },
+      "description": "VCPS-EVD-060: a correction creates a new record linked by supersedes_ref; the prior record is never edited."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "tier": { "const": "E0" } }, "required": ["tier"] },
+      "then": {
+        "properties": { "result": { "not": { "const": "PASS" } } },
+        "description": "VCPS-EVD-001/templates/validation.md item 6: E0 CLAIMED cannot support a gate PASS."
+      }
+    }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role": { "enum": ["human", "agent"] },
+        "identity": {
+          "type": "string",
+          "description": "Whatever stable identity the environment provides (VCPS-EVD-032). No specific vendor/model/agent identity format is required."
+        }
+      }
+    },
+    "revision": {
+      "description": "glossary.md 'Revision'. A committed revision is a VCS content hash. A dirty-worktree revision (VCPS-EVD-052) MUST be reconstructable by content hash/manifest, never a bare timestamp.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 7,
+          "description": "A VCS commit hash (or equivalent immutable identifier)."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["base_commit_hash", "dirty", "manifest_hash"],
+          "properties": {
+            "base_commit_hash": { "type": "string", "minLength": 7 },
+            "dirty": { "const": true },
+            "manifest_hash": {
+              "type": "string",
+              "description": "Content hash of a manifest covering every changed/untracked file in scope, per VCPS-EVD-052."
+            },
+            "manifest_ref": {
+              "type": "string",
+              "description": "Repository-relative locator for the manifest itself, if persisted."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

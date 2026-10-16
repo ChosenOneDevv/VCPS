@@ -1,0 +1,126 @@
+{
+  "case_id": "PHASE-J-SETUP-RESUME",
+  "adapter": "Claude Code (interactive session, direct skill execution)",
+  "model_id": "claude-sonnet-5",
+  "date": "2026-10-07",
+  "status": "COMPLETED",
+  "result": "LIVE_ADAPTER_EXECUTION",
+  "summary": "A real /vcps-setup RESUME execution (Stages 1-11) against a disposable clone of the owner-selected synthetic commerce fixture, whose .vcps/ state had only ever been seeded (PARTIAL at Stage 1, empty stage_events), never produced by a real Setup Engine run.",
+  "data_scope": "A disposable git clone of evaluation/fixtures/synthetic-commerce at HEAD 30e28e73dd75dce4737173d77e63d29a5a5282c1, under /tmp. The owner-selected source fixture itself was not modified.",
+  "fixture_source_revision": "30e28e73dd75dce4737173d77e63d29a5a5282c1",
+  "detect_result": {
+    "has_vcps_dir": true,
+    "has_config": true,
+    "config_parseable": true,
+    "route": "RESUME",
+    "mode": null,
+    "vcps_version_relation": "EQUAL",
+    "project_schema_relation": "EQUAL"
+  },
+  "plan": {
+    "base_revision": "30e28e73dd75dce4737173d77e63d29a5a5282c1",
+    "mode": "ADOPT",
+    "level": "L3",
+    "create_paths": ["VCPS.md", ".vcps/baseline.md"],
+    "max_changed_files": 10,
+    "max_bytes": 50000,
+    "max_commands": 5,
+    "sha256": "c5dbb6b3ed842d1ccd88326bc10c20051962e06cfb2f8210bef53a154ccd77bb"
+  },
+  "stages_executed": [
+    "1 Repository discovery",
+    "2 Stack/toolchain discovery",
+    "3 Risk classification",
+    "4 VCPS scaffold (created VCPS.md)",
+    "5 Dirty-tree/legacy classification",
+    "6 Baseline verification (python3 -m unittest discover -s tests -v, 8/8 PASS, E2 LOCAL)",
+    "7 Locally actionable remediation (none needed)",
+    "8 Baseline establishment (created .vcps/baseline.md)",
+    "9 Legacy evidence-gap registry (created FND-5ed8b1b2-2b5a-41f0-8df1-94287d034ec2, no-CI EVIDENCE_GAP, HIGH, OPEN)",
+    "10 CI quality-gate alignment (same finding, not duplicated)",
+    "11 VCPS system audit (SETUP_STATUS: COMPLETE)"
+  ],
+  "new_records": [
+    "VCPS.md",
+    ".vcps/baseline.md",
+    ".vcps/evidence/EVD-8e8bb3c0-5335-4a30-9458-f21f432fea10.md",
+    ".vcps/findings/FND-5ed8b1b2-2b5a-41f0-8df1-94287d034ec2.md"
+  ],
+  "deliberately_untouched_by_the_setup_resume_itself": [
+    "BUG-00000000-0000-4000-8000-000000000002.md (remains BLOCKED, its own workflow)",
+    "GATE-00000000-0000-4000-8000-000000000020..024.md (the BUG's own gates)"
+  ],
+  "validate_after": {"ok": true, "errors": [], "ids_seen": 12, "schema_validation_status": "CHECKED"},
+  "same_session_resume_status_after_completion": {
+    "resumable": true, "declared_status": "COMPLETE", "earliest_incomplete_stage": null, "stale_stages": {}
+  },
+  "fresh_session_check": {
+    "method": "A separate Agent invocation with no shared conversation state, run before any git commit in the clone.",
+    "resume_status": {"resumable": true, "declared_status": "COMPLETE", "earliest_incomplete_stage": null, "stale_stages": {}},
+    "validate": {"ok": true, "errors": []},
+    "git_status_unchanged_by_the_check": true,
+    "note": "This is the true clean-resume no-op fresh-session check Phase A's own live acceptance pass (evaluation/claude-code-adapter.md third live acceptance entry) explicitly left open, obtained here before any post-setup commit."
+  },
+  "revision_invalidation_check": {
+    "method": "Appended a trivial comment to commerce/orders.py (uncommitted), reran resume-status, then reverted.",
+    "after_edit": {"earliest_incomplete_stage": 1, "stale_stages_count": 11},
+    "after_revert": {"stale_stages": {}}
+  },
+  "defect_found_and_fixed_during_this_pass": {
+    "description": "A '.'-scoped stage's input_fingerprint must be computed after that stage's own non-.vcps/ output (VCPS.md) already exists, not strictly before it -- vcps_tool.py's .vcps/ exclusion in expand_scope does not extend to VCPS.md itself, so a pre-output fingerprint makes every future resume check show that stage permanently stale.",
+    "classification": "Methodology correction (how this fingerprint must be computed), not a vcps_tool.py code change -- consistent with how templates/validation.md already defines stage-output exclusion; vcps_tool.py's expand_scope was not modified in this pass.",
+    "fixed_before_finalizing": true
+  },
+  "feature_gate_pass": {
+    "summary": "Immediately after the setup resume above, in the same disposable clone, FEAT-00000000-0000-4000-8000-000000000001 (R3/L3, previously PROPOSED with zero gates ever evaluated) went through a real Gate 1-5 pass against its existing scope (commerce/payments.py, tests/test_commerce.py -- reviewing existing code, not writing new code).",
+    "risk_classification": {
+      "method": "vcps_router.py escalation-check --touched-path commerce/payments.py --touched-path tests/test_commerce.py",
+      "result": "forced_r3: true, matched both INV-001 and INV-002's enforcement_path",
+      "segmentation_scan": "overlaps BUG-00000000-0000-4000-8000-000000000002 only on tests/test_commerce.py (different invariants/test methods); judged not the same logical unit of work, no further escalation"
+    },
+    "gate_1_product": {"outcome": "PASS", "ref": "GATE-18b2cbc5-a236-4d25-b87e-4ae75c3487ac"},
+    "gate_2_architecture": {
+      "outcome": "PARTIAL", "ref": "GATE-ba8c3d4c-8b83-475a-8f5c-3279da52f8f2",
+      "finding": "FND-1cfb269e-7ce9-475d-92a7-9e50b4737a6d (LOW): authorization/isolation/atomicity/idempotency are genuinely engineered and verified; observability (no audit log) and recovery (no documented procedure) are not addressed."
+    },
+    "gate_3_implementation": {"outcome": "PASS", "ref": "GATE-52a3dd7b-c3a8-4e84-8aef-643045930d1f"},
+    "independent_verification_I2": {
+      "method": "A separately-launched Agent invocation with no shared conversation state, briefed only on AC-1 and the code, not on this session's reasoning or conclusions.",
+      "real_test_rerun": "python3 -m unittest tests.test_commerce.CommerceInvariants.test_payment_signature_and_idempotency tests.test_commerce.CommerceInvariants.test_forged_or_cross_tenant_webhook_is_rejected -v -- both PASS, independently executed.",
+      "findings": [
+        "hmac.compare_digest used (constant-time, not vulnerable to timing attack) -- confirmed by line citation",
+        "payload identity (tenant_id/order_id/event_id) checked against caller's actual arguments, not just 'a valid signature exists' -- confirmed, this is what makes the forged-cross-tenant test pass",
+        "a replayed identical signed event is rejected before any mutation (event_id/status guard under store.lock) -- confirmed, satisfies AC-1",
+        "no swallowed exceptions anywhere in the file; no cross-tenant read/settle path found"
+      ],
+      "verdict": "AC-1 is satisfied by the code and corroborated by both real, independently-rerun tests. No defect found."
+    },
+    "gate_4_verification": {
+      "outcome": "BLOCKED", "reason_codes": ["EVIDENCE", "DECISION"], "independence_mode": "I2",
+      "ref": "GATE-718c3ad0-9535-4f32-9a60-1d10fd1f4468",
+      "why_blocked_despite_no_defect_found": "standard/levels.md requires E3 CI fidelity for an R3 invariant assertion at L3 (INV-001/INV-002); no hosted CI exists (FND-5ed8b1b2-2b5a-41f0-8df1-94287d034ec2, HIGH, OPEN); levels.md Sec5's L3 HIGH-severity blocking threshold applies, and VCPS-GATE-010 requires an owner HC-08 decision before progressing past even PARTIAL on a gap this severe at this level -- an agent cannot grant itself that checkpoint."
+    },
+    "gate_5_security": {
+      "outcome": "BLOCKED", "reason_codes": ["EVIDENCE", "DECISION"], "independence_mode": "I2",
+      "ref": "GATE-bdff90fb-9e39-4a39-9858-88ef49b8b502",
+      "touched_categories_evaluated": ["VCPS-G5-003 object-level access control", "VCPS-G5-005 server-side enforcement", "VCPS-G5-011 webhook authenticity and money-relevant idempotency"],
+      "why_blocked": "identical evidence-tier gap as Gate 4 (VCPS-G5-014 cross-references the same baseline mechanism)."
+    },
+    "feature_lifecycle_outcome": {
+      "from_state": "PROPOSED", "to_state": "CODED",
+      "reasoning": "Gates 1-3 PASS/PARTIAL -> CODED per adapters/claude-code/vcps-feature/SKILL.md Step 4. Gates 4-5 BLOCKED (not PASS/permitted-PARTIAL) -> VERIFIED is not reached, per Step 7. ACCEPTED was never considered -- VCPS-LC-003 forbids an agent setting it."
+    },
+    "validate_after": {"ok": true, "errors": [], "ids_seen": 18, "schema_validation_status": "CHECKED"}
+  },
+  "review_pass": {
+    "summary": "A normal /vcps-review pass, never previously exercised against this fixture, covering commerce/orders.py and commerce/admin.py against INV-001/INV-002 -- distinct from BUG-...0002's already-fixed duplicate-SKU scope.",
+    "intent_sources": [".vcps/invariants.md (INV-001, INV-002)", "tests/test_commerce.py", "direct code reading"],
+    "result": "No DEFECT found. Tenant-scoped lookups, all-or-nothing stock reservation (confirmed by test_order_reservation_is_all_or_nothing), and role-gated cancellation are all correctly implemented.",
+    "gap_found": "FND-647e1a7f-3287-40d8-9cf2-4c4a91ca37a7 (LOW): cancel_order's rejection of a non-PENDING order is correct by inspection but has no executed test.",
+    "exit_report": "PARTIALLY REVIEWED (one open EVIDENCE_GAP), per workflows/review.md's exit condition -- not reported as clean/fully verified.",
+    "ref": "REV-7b2275d1-4819-4dd5-abaf-fb192b84aa10",
+    "validate_after": {"ok": true, "errors": [], "ids_seen": 20}
+  },
+  "classification": "LIVE_ADAPTER_EXECUTION, closing three Phase J gaps: 'this Phase J fixture itself still has no Claude-authored setup state', 'the FEATURE's gates remain unevaluated', and 'the normal feature/review workflow was not exercised' (evaluation/phase-j-acceptance.md 'Not established'). Does NOT close: the BUG workflow (remains BLOCKED by design, untouched), VERIFIED/ACCEPTED for the FEATURE (honestly blocked/not self-grantable), the review's own open EVIDENCE_GAP, or any real human/owner checkpoint -- those remain explicitly open, see evaluation/phase-j-acceptance.md.",
+  "note": "Three completed interactive-session passes against the same disposable clone (setup resume, a feature gate pass, then a review pass). The owner-selected source fixture (evaluation/fixtures/synthetic-commerce/) was not modified; see evaluation/fixtures/phase-j-setup-resume/ for the durable snapshot of all new records from all three passes."
+}

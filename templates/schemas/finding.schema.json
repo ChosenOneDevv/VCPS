@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/finding.schema.json",
+  "title": "VCPS finding record",
+  "description": "Structural schema for .vcps/findings/FND-*.md frontmatter. Owned in content by standard/classifications.md SS5 (VCPS-CLS-040) and by templates/contract.md's fuller per-record field list (domain, affected invariants, blocking scope, resolution). NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "id", "title", "classification", "severity",
+    "status", "scope", "requirement_refs", "evidence_refs",
+    "affected_invariants", "blocking_scope", "discovered_by",
+    "discovered_in", "history"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "classification": {
+      "enum": ["DEFECT", "EVIDENCE_GAP", "EXTERNAL_ACCEPTANCE", "KNOWN_LIMITATION"]
+    },
+    "severity": { "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+    "status": {
+      "enum": ["OPEN", "RESOLVED", "RISK_ACCEPTED", "WITHDRAWN"]
+    },
+    "domain": {
+      "type": "string",
+      "description": "Free-text domain tag, e.g. 'security', 'data-integrity' (contract.md's 'domain' field)."
+    },
+    "target_attribution": {
+      "enum": ["PRODUCT", "CHECK", "UNATTRIBUTED"],
+      "description": "VCPS-CLS-004: a reproducibly-failing check is a DEFECT in the product or in the check; when unknown, record UNATTRIBUTED."
+    },
+    "scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Files/components/features this finding is about."
+    },
+    "requirement_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "VCPS-<AREA>-<NNN> style identifiers this finding cites (VCPS-CORE-010)."
+    },
+    "affected_invariants": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^INV-[0-9]{3,}$" }
+    },
+    "blocking_scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Gate/work-item IDs this finding currently blocks, if any. Empty array if it blocks nothing yet."
+    },
+    "discovered_by": { "$ref": "#/$defs/identity" },
+    "discovered_in": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow", "revision"],
+      "properties": {
+        "workflow": {
+          "enum": ["SETUP", "FEATURE", "REVIEW", "BUG", "TINY", "HOTFIX", "AUDIT", "RELEASE"]
+        },
+        "revision": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "producer": { "$ref": "#/$defs/identity" },
+    "verifier": { "$ref": "#/$defs/identity" },
+    "owner": { "$ref": "#/$defs/identity" },
+    "origin": {
+      "enum": ["LEGACY"],
+      "description": "Present only for findings created during SETUP's legacy classification of pre-existing content (VCPS-SETUP-022)."
+    },
+    "touch_rule": {
+      "type": "string",
+      "description": "Required when origin is LEGACY (VCPS-SETUP-022/023): the ratchet condition under which this legacy finding escalates to a current workflow's gates."
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "remediation_evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "regression_test_ref": {
+          "type": ["string", "null"],
+          "description": "VCPS-CLS-031: where practical, a RESOLVED DEFECT cites a regression test."
+        },
+        "risk_acceptance_ref": {
+          "type": ["string", "null"],
+          "pattern": "^HCR-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "description": "Required when status is RISK_ACCEPTED and severity is HIGH or CRITICAL (VCPS-CLS-030, HC-08)."
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "reason"],
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "from_classification": {
+            "enum": ["DEFECT", "EVIDENCE_GAP", "EXTERNAL_ACCEPTANCE", "KNOWN_LIMITATION"]
+          },
+          "to_classification": {
+            "enum": ["DEFECT", "EVIDENCE_GAP", "EXTERNAL_ACCEPTANCE", "KNOWN_LIMITATION"]
+          },
+          "from_status": {
+            "enum": ["OPEN", "RESOLVED", "RISK_ACCEPTED", "WITHDRAWN"]
+          },
+          "to_status": {
+            "enum": ["OPEN", "RESOLVED", "RISK_ACCEPTED", "WITHDRAWN"]
+          },
+          "reason": { "type": "string", "minLength": 1 },
+          "evidence_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "origin": { "const": "LEGACY" } }, "required": ["origin"] },
+      "then": { "required": ["touch_rule"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "RISK_ACCEPTED" } }, "required": ["status"] },
+      "then": {
+        "anyOf": [
+          { "properties": { "severity": { "enum": ["LOW", "MEDIUM"] } } },
+          { "required": ["resolution"] }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "RESOLVED" } }, "required": ["status"] },
+      "then": {
+        "required": ["resolution"],
+        "properties": {
+          "resolution": {
+            "required": ["remediation_evidence_refs"],
+            "properties": { "remediation_evidence_refs": { "minItems": 1 } }
+          }
+        },
+        "description": "VCPS-CLS-031/templates/validation.md item 5: a RESOLVED finding must cite remediation evidence."
+      }
+    },
+    {
+      "if": { "properties": { "classification": { "const": "KNOWN_LIMITATION" } }, "required": ["classification"] },
+      "then": {
+        "properties": { "status": { "const": "RISK_ACCEPTED" } },
+        "description": "classifications.md SS4: KNOWN_LIMITATION findings are RISK_ACCEPTED by definition."
+      }
+    }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role": { "enum": ["human", "agent"] },
+        "identity": { "type": "string" }
+      }
+    }
+  }
+}

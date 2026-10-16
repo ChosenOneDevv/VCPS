@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/risk-model.schema.json",
+  "title": "VCPS project risk profile",
+  "description": "Structural schema for .vcps/risk-model.md frontmatter. Owned in content by standard/risk-model.md (dimensions D1-D9, VCPS-RISK-010/020/021) and templates/contract.md ('risk-model.md has project and optional component profiles with all D1-D9 ratings, paths, and evidence references'). NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profiles"],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/profile" },
+      "description": "Exactly one profile MUST have scope PROJECT; at most one profile per named component (templates/validation.md item 4)."
+    }
+  },
+  "$defs": {
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rating"],
+      "properties": {
+        "rating": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "impact_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "VCPS-RISK-010: required (non-empty) when rating > 0, cited as E1 STATIC evidence or stronger."
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "evidence_gap": {
+          "type": "boolean",
+          "description": "True when this rating has only E0 CLAIMED support (VCPS-RISK-010): the rating MUST then be treated as the higher candidate value until resolved."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "rating": { "not": { "const": 0 } } },
+            "required": ["rating"]
+          },
+          "then": {
+            "anyOf": [
+              { "properties": { "impact_paths": { "minItems": 1 } }, "required": ["impact_paths"] },
+              { "properties": { "evidence_gap": { "const": true } }, "required": ["evidence_gap"] }
+            ]
+          }
+        }
+      ]
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "dimensions", "derived_level", "rationale"],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "description": "'PROJECT' for the single project-wide profile, or a component identifier for a per-component profile (VCPS-RISK-021)."
+        },
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9"],
+          "properties": {
+            "D1": { "$ref": "#/$defs/dimension" },
+            "D2": { "$ref": "#/$defs/dimension" },
+            "D3": { "$ref": "#/$defs/dimension" },
+            "D4": { "$ref": "#/$defs/dimension" },
+            "D5": { "$ref": "#/$defs/dimension" },
+            "D6": { "$ref": "#/$defs/dimension" },
+            "D7": { "$ref": "#/$defs/dimension" },
+            "D8": { "$ref": "#/$defs/dimension" },
+            "D9": { "$ref": "#/$defs/dimension" }
+          }
+        },
+        "derived_level": {
+          "enum": ["L1", "L2", "L3"],
+          "description": "Derived exactly per VCPS-RISK-020 from the dimension ratings above. project.yaml.level.value MUST match this for the PROJECT-scope profile."
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "shared_path_elevation": {
+          "type": "boolean",
+          "description": "VCPS-RISK-021: true when this (otherwise lower-level) component is treated at the project's higher level because it shares a database/credential/deploy unit with a higher-level component."
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["timestamp", "reason"],
+            "properties": {
+              "timestamp": { "type": "string", "format": "date-time" },
+              "from_level": { "enum": ["L1", "L2", "L3"] },
+              "to_level": { "enum": ["L1", "L2", "L3"] },
+              "reason": { "type": "string" },
+              "approval_ref": {
+                "type": ["string", "null"],
+                "pattern": "^HCR-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                "description": "Required (non-null) when this entry lowers the level (VCPS-RISK-022, HC-09)."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

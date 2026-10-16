@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/handoff.schema.json",
+  "title": "VCPS handoff record",
+  "description": "Structural schema for .vcps/handoffs/HND-*.md frontmatter. Owned in content by standard/portability.md SS4 (VCPS-PORTABILITY-006) and templates/contract.md's handoff field list. By design this record REFERENCES version/level/lifecycle/gate state by current source rather than duplicating it as a frozen snapshot that could drift. NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "id", "workflow", "step", "project_ref",
+    "work_item_refs", "gate_refs", "finding_refs", "pending_checkpoint",
+    "next_actions", "timestamp", "producer"
+  ],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^HND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "workflow": {
+      "enum": ["SETUP", "FEATURE", "REVIEW", "BUG", "TINY", "HOTFIX", "AUDIT", "RELEASE"]
+    },
+    "step": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The workflow step/stage this handoff was produced at, e.g. 'Stage 6' for SETUP."
+    },
+    "project_ref": {
+      "const": ".vcps/project.yaml",
+      "description": "Fixed singleton pointer; version/level/lifecycle/gate outcomes are obtained through this reference, never restated here (VCPS-PORTABILITY-006)."
+    },
+    "work_item_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "gate_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^GATE-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "finding_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "pending_checkpoint": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "code": { "pattern": "^HC-(0[1-9]|1[0-6])$" },
+        "action": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["code", "action", "scope", "reason"],
+      "description": "Null only when nothing is pending. When present, every field is required so the next session can resume without re-deriving it (VCPS-PORTABILITY-006)."
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Concise next actions for whoever resumes this work."
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "producer": { "$ref": "#/$defs/identity" },
+    "supersedes_ref": {
+      "type": ["string", "null"],
+      "pattern": "^HND-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "A new handoff supersedes an old one (templates/contract.md); the old record is retained."
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role": { "enum": ["human", "agent"] },
+        "identity": { "type": "string" }
+      }
+    }
+  }
+}

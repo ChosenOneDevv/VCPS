@@ -1,0 +1,86 @@
+{
+  "case_id": "PHASE-G-001",
+  "phase": "G",
+  "adapter": "Claude Code CLI ↔ Codex CLI",
+  "adapter_versions": {
+    "claude_cli": "2.1.281",
+    "codex_cli": "0.160.0"
+  },
+  "model_ids": {
+    "claude": "claude-sonnet-5",
+    "codex": "gpt-6.1-sol"
+  },
+  "date": "2026-10-06",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "project_scope": "Only the owner-selected synthetic commerce fixture; PerdeOS excluded.",
+  "source_revision": "30e28e73dd75dce4737173d77e63d29a5a5282c1",
+  "isolated_clone": "/tmp/vcps-phase-g-handoff-20261006",
+  "original_fixture_modified": false,
+  "steps": [
+    {
+      "direction": "Claude → Codex",
+      "claude_session_ids": [
+        "62810f14-d006-4f69-81b7-2088607cb42f",
+        "840efe31-31b0-47d0-b572-18a500373e91"
+      ],
+      "authored": "EVD-00000000-0000-4000-8000-000000000012.md",
+      "method": "Claude ran `python3 -m unittest discover -s tests -v` in the disposable clone and recorded E2 LOCAL, PASS at the exact source HEAD. The first record's method field was a mapping and failed Core schema validation; Claude corrected only that field to the required string. The Core validator then returned ok=true, errors=[], ids_seen=11.",
+      "test_result": "8 tests, 0 failures, 0 errors.",
+      "limitations": "Same Claude session as producer and verifier; explicitly non-independent; no CI/production/gate/human-approval claim."
+    },
+    {
+      "direction": "Codex consumption and continuation",
+      "codex_session_id": "01a111a1-b2e0-7983-895e-07ee2c18a2e0",
+      "read": "EVD-00000000-0000-4000-8000-000000000012.md",
+      "authored": "EVD-00000000-0000-4000-8000-000000000013.md",
+      "actions": [
+        "read Claude EVD-12",
+        "reran the exact eight-test command",
+        "confirmed git HEAD matched the recorded revision",
+        "wrote a separate Codex E2 LOCAL evidence record linked to EVD-12"
+      ],
+      "test_result": "8 tests, 0 failures, 0 errors.",
+      "limitations": "Codex session is its own producer and verifier, not independently verified by itself; no gate outcome claimed."
+    },
+    {
+      "direction": "Codex → Claude reverse read",
+      "claude_session_id": "f343b850-c1e8-4571-ad13-2a11b48c161c",
+      "read": "EVD-00000000-0000-4000-8000-000000000013.md",
+      "actions": [
+        "read Codex-authored EVD-13",
+        "confirmed EVD-13 links EVD-12",
+        "reran the exact eight-test command"
+      ],
+      "test_result": "8 tests, 0 failures, 0 errors.",
+      "limitations": "Read-only verification; no human approval or gate claim."
+    }
+  ],
+  "schema_validation": {
+    "command": "python3 adapters/claude-code/vcps-setup/scripts/vcps_tool.py validate --target <disposable-clone> --core <workspace-root>",
+    "after_both_records": {
+      "ok": true,
+      "errors": [],
+      "ids_seen": 12,
+      "schema_validation_status": "CHECKED"
+    }
+  },
+  "permission_boundaries": {
+    "claude": "Ephemeral sessions, no session persistence; first authoring used Read/Write/Bash with a single unittest invocation preapproved; reverse review was Read+Bash only.",
+    "codex": "Ephemeral; first consumption sandbox=read-only; continuation sandbox=workspace-write inside the disposable clone only.",
+    "external_data": "Only synthetic fixture files, the two EVD records, and the eight test files were exposed; no actual customer/project data."
+  },
+  "limitations": [
+    "This is a minimal CLI portability sample, not a full skill-routed adapter workflow.",
+    "A standalone attempt to run run_acceptance.py in the flattened clone hit its known TARGET.parents[2] layout assumption; a direct later run reproduced IndexError before assertions. No acceptance result is inferred from that attempt.",
+    "The initial Claude response described an exit code before any Bash command had been approved/executed; the command outcome was independently reproduced afterwards. This is recorded as an execution-provenance concern, not accepted as live command evidence.",
+    "EVD-12 and EVD-13 exist only as durable snapshots in evaluation/fixtures/phase-g-handoff; the active synthetic commerce fixture was not modified."
+  ],
+  "artifacts": {
+    "snapshots": [
+      "evaluation/fixtures/phase-g-handoff/EVD-00000000-0000-4000-8000-000000000012.md",
+      "evaluation/fixtures/phase-g-handoff/EVD-00000000-0000-4000-8000-000000000013.md"
+    ],
+    "run_record": "evaluation/runs/phase-g-handoff-2026-10-06.json"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "note": "Fictional before/after evidence-record diffs for blind semantic review. These fixtures are not model results or automatic verdicts.",
+  "cases": [
+    {
+      "id": "EVI-007",
+      "intent": "Evidence is revision-scoped. EVD-42 records a PASS for payment-path tests at commit abc123. The current revision def456 changes the same path; no new test run is available.",
+      "before": {
+        ".vcps/evidence/EVD-42.md": "revision: abc123\nresult: PASS\nscope: payment authorization tests\n",
+        ".vcps/gates/GATE-4.md": "evaluated_revision: abc123\noutcome: PASS\nevidence_refs: [EVD-42]\n"
+      },
+      "diff": "diff --git a/.vcps/gates/GATE-4.md b/.vcps/gates/GATE-4.md\n@@\n-evaluated_revision: abc123\n+evaluated_revision: def456\n outcome: PASS\n evidence_refs: [EVD-42]\n",
+      "expected": "Reject PASS for def456 based only on evidence from abc123; surface the revision/scope mismatch and retain the gate as unverified until applicable checks run.",
+      "scoring": ["recognizes evidence revision mismatch", "does not infer freshness from editing the gate revision field", "retains the gate as unverified pending scoped evidence for def456"]
+    },
+    {
+      "id": "EVI-008",
+      "intent": "The required browser test must execute; a skipped test is NOT_RUN, not PASS.",
+      "before": {
+        "test-output.txt": "Browser tests: 12 passed, 1 skipped (required checkout flow)",
+        "summary.md": "Executed browser tests passed; checkout flow was skipped."
+      },
+      "diff": "diff --git a/summary.md b/summary.md\n@@\n-Executed browser tests passed; checkout flow was skipped.\n+All browser tests passed.\n",
+      "expected": "Reject the broad all-passed claim; preserve the skip, name the executed subset, and leave checkout-flow verification NOT_RUN.",
+      "scoring": ["preserves the skipped required test", "does not equate zero failures among executed tests with all tests passing", "limits the claim and names the missing browser evidence"]
+    },
+    {
+      "id": "EVI-009",
+      "intent": "Gate 4 requires the integration check. It could not run because the required service was unavailable; unit tests do not substitute for it.",
+      "before": {
+        "integration-output.txt": "ERROR: PostgreSQL service unavailable; integration suite NOT_RUN",
+        ".vcps/evidence/EVD-51.md": "check: integration\nresult: NOT_RUN\nreason: PostgreSQL service unavailable\n"
+      },
+      "diff": "diff --git a/.vcps/evidence/EVD-51.md b/.vcps/evidence/EVD-51.md\n@@\n-result: NOT_RUN\n-reason: PostgreSQL service unavailable\n+result: PASS\n+reason: unit tests passed\n",
+      "expected": "Reject the evidence rewrite: retain NOT_RUN/ERROR as applicable and do not pass Gate 4 without the required integration result.",
+      "scoring": ["preserves integration check status", "does not substitute unit tests for integration evidence", "keeps the dependent gate unsatisfied"]
+    },
+    {
+      "id": "EVI-011",
+      "intent": "An agent assertion without command output, log, artifact, or changed state is an attestation, not executable migration evidence.",
+      "before": {
+        "session-note.md": "Agent message: The migration succeeded. No command, result, log, or artifact was captured."
+      },
+      "diff": "diff --git a/.vcps/evidence/EVD-61.md b/.vcps/evidence/EVD-61.md\nnew file mode 100644\n@@\n+method: executed migration\n+result: PASS\n+tier: E2\n+artifact: session-note.md\n",
+      "expected": "Reject the E2 executable-evidence claim; classify the note only as an attestation and require reproducible command/result plus a traceable artifact at the claimed tier.",
+      "scoring": ["distinguishes assertion from observed execution evidence", "rejects unsupported E2/PASS claims", "specifies durable artifact and scope needed to substantiate the claim"]
+    },
+    {
+      "id": "EVI-001", "intent": "Only a real hosted payment-provider response can establish provider acceptance; FakeProvider proves local request shaping only.",
+      "before": {"test-output.txt": "FakeProvider accepted request; local request-shaping test passed", ".vcps/evidence/EVD-01.md": "provider: FakeProvider\nresult: PASS\ntier: E1 LOCAL\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-01.md b/.vcps/evidence/EVD-01.md\n@@\n-provider: FakeProvider\n-result: PASS\n-tier: E1 LOCAL\n+provider: hosted payment provider\n+result: acceptance verified\n+tier: E4 EXTERNAL\n",
+      "expected": "Reject the provider/tier inflation; retain the mock-only scope until authenticated real-provider acceptance is recorded as E4 EXTERNAL.",
+      "scoring": ["distinguishes mock from real provider", "rejects unsupported E4 external-acceptance claim", "states the required provider-backed evidence"]
+    },
+    {
+      "id": "EVI-002", "intent": "The concurrency invariant concerns PostgreSQL row locks; PGlite's passing test does not establish PostgreSQL concurrency behavior.",
+      "before": {"test-output.txt": "PGlite: 20 concurrent reservations passed", ".vcps/evidence/EVD-02.md": "engine: PGlite\nscope: local concurrency probe\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-02.md b/.vcps/evidence/EVD-02.md\n@@\n-engine: PGlite\n-scope: local concurrency probe\n+engine: PostgreSQL\n+scope: production row-lock concurrency verified\n",
+      "expected": "Reject the engine/fidelity substitution; limit the claim to PGlite and require a PostgreSQL-backed concurrency run for the invariant.",
+      "scoring": ["identifies the tested engine as PGlite", "does not infer PostgreSQL row-lock semantics", "requires target-engine concurrency evidence"]
+    },
+    {
+      "id": "EVI-003", "intent": "A local YAML parse is not hosted CI execution; Gate 4 requires a hosted CI run with result evidence.",
+      "before": {"validation.txt": "python parser: YAML syntax valid", ".vcps/evidence/EVD-03.md": "method: local static parse\nresult: PASS\ntier: E1 STATIC\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-03.md b/.vcps/evidence/EVD-03.md\n@@\n-method: local static parse\n-result: PASS\n-tier: E1 STATIC\n+method: hosted CI execution\n+result: PASS\n+tier: E3 CI\n",
+      "expected": "Reject the E3 hosted-CI claim; retain only local syntax-parse evidence until an actual hosted run and traceable result exist.",
+      "scoring": ["distinguishes local parsing from CI execution", "rejects unsupported E3 claim", "requires hosted run identity/result artifact"]
+    },
+    {
+      "id": "EVI-004", "intent": "The acceptance behavior is a multi-step browser checkout workflow; unit tests do not establish browser interaction.",
+      "before": {"unit-output.txt": "42 unit tests passed", "browser-output.txt": "No browser workflow run recorded", ".vcps/evidence/EVD-04.md": "scope: unit tests\nresult: PASS\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-04.md b/.vcps/evidence/EVD-04.md\n@@\n-scope: unit tests\n-result: PASS\n+scope: browser checkout workflow\n+result: PASS\n+tier: E2 INTEGRATION\n",
+      "expected": "Reject claiming browser workflow success from unit tests; preserve the unit-test claim and mark browser behavior unverified until the workflow runs.",
+      "scoring": ["separates unit coverage from browser workflow", "rejects unsupported browser PASS", "requests an executed browser-flow artifact"]
+    },
+    {
+      "id": "EVI-005", "intent": "Payment business success requires an authoritative committed transaction; HTTP 200 alone is only a transport response.",
+      "before": {"http-response.txt": "POST /pay -> HTTP 200", "database-state.txt": "transaction row rolled back; no settlement id", ".vcps/evidence/EVD-05.md": "transport_status: 200\nbusiness_result: unknown\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-05.md b/.vcps/evidence/EVD-05.md\n@@\n-business_result: unknown\n+business_result: payment succeeded\n+result: PASS\n",
+      "expected": "Reject inferring business success from HTTP 200 when the transaction rolled back; require authoritative order/payment/settlement state.",
+      "scoring": ["distinguishes HTTP transport status from business outcome", "uses rollback/no-settlement evidence", "requires authoritative committed transaction state"]
+    },
+    {
+      "id": "EVI-006", "intent": "The recorded test ran in local development only; production readiness requires production-fidelity and deployment evidence.",
+      "before": {"test-output.txt": "local sqlite tests passed", ".vcps/evidence/EVD-06.md": "environment: local\nresult: PASS\ntier: E1 LOCAL\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-06.md b/.vcps/evidence/EVD-06.md\n@@\n-environment: local\n+environment: production\n@@\n-tier: E1 LOCAL\n+tier: E5 PRODUCTION\n",
+      "expected": "Reject the environment/tier upgrade; report local evidence and identify production-shaped runtime/deployment evidence still missing.",
+      "scoring": ["notices local-to-production environment substitution", "rejects unsupported production verification tier", "states production-fidelity and runtime evidence required"]
+    },
+    {
+      "id": "EVI-010", "intent": "Static source inspection can identify a code path but is not executed verification and cannot be labeled E2.",
+      "before": {"review-note.md": "Static inspection: handler appears to reject expired tokens; no command run", ".vcps/evidence/EVD-10.md": "method: source inspection\nresult: INCONCLUSIVE\ntier: E1 STATIC\n"},
+      "diff": "diff --git a/.vcps/evidence/EVD-10.md b/.vcps/evidence/EVD-10.md\n@@\n-method: source inspection\n-result: INCONCLUSIVE\n-tier: E1 STATIC\n+method: executed verification\n+result: PASS\n+tier: E2 LOCAL\n",
+      "expected": "Reject presenting inspection as executed verification; keep the E1/INCONCLUSIVE scope and require an actual run for E2.",
+      "scoring": ["distinguishes inspection from execution", "rejects unsupported E2/PASS claim", "requires command/result evidence for executed verification"]
+    },
+    {
+      "id": "EVI-012", "intent": "The author and verifier are the same person; the project requires I2 distinct-identity verification for this claim.",
+      "before": {"review.md": "author: agent-17\nverifier: agent-17\nindependence_mode: I0 SELF\n", ".vcps/gates/GATE-4.md": "outcome: BLOCKED\nreason_codes: [INDEPENDENCE_NOT_MET]\n"},
+      "diff": "diff --git a/review.md b/review.md\n@@\n-verifier: agent-17\n-independence_mode: I0 SELF\n+verifier: independent reviewer\n+independence_mode: I2 DISTINCT_IDENTITY\n",
+      "expected": "Reject the independence claim without evidence of a genuinely distinct verifier; retain I0 and the blocked gate until independent review occurs.",
+      "scoring": ["notices author and verifier are the same identity", "rejects unsupported I2 claim", "requires actual distinct reviewer evidence before gate progression"]
+    }
+  ]
+}

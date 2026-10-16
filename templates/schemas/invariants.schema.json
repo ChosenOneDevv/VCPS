@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vcps.dev/schemas/invariants.schema.json",
+  "title": "VCPS critical invariant registry",
+  "description": "Structural schema for .vcps/invariants.md frontmatter. Owned in content by standard/risk-model.md SS4 (VCPS-RISK-030). NEW_CANONICAL_RECONSTRUCTION authored 2026-10-06; see evaluation/completion-roadmap.md Phase B.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "invariants"],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id", "statement", "owner", "impact_dimensions",
+          "enforcement_path", "evidence_refs", "history"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^INV-[0-9]{3,}$",
+            "description": "templates/contract.md: INV- followed by at least three decimal digits. Allocate above the existing maximum; never renumber."
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The invariant as a falsifiable assertion, e.g. 'A tenant can never read another tenant's rows.'"
+          },
+          "owner": { "$ref": "#/$defs/identity" },
+          "impact_dimensions": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "enum": ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9"] }
+          },
+          "component_scope": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "enforcement_path": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" },
+            "description": "Files, schema objects, configuration, and checks that together uphold this invariant. A change to any of these escalates to R3 (VCPS-RISK-041)."
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^EVD-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "status": {
+            "enum": ["ACTIVE", "WITHDRAWN"],
+            "default": "ACTIVE",
+            "description": "Withdrawn invariant IDs remain reserved (templates/contract.md) and are never reused for a different meaning."
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["timestamp", "reason"],
+              "properties": {
+                "timestamp": { "type": "string", "format": "date-time" },
+                "change": { "type": "string" },
+                "reason": { "type": "string", "minLength": 1 },
+                "approval_ref": {
+                  "type": ["string", "null"],
+                  "pattern": "^HCR-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role": { "enum": ["human", "agent"] },
+        "identity": { "type": "string" }
+      }
+    }
+  }
+}

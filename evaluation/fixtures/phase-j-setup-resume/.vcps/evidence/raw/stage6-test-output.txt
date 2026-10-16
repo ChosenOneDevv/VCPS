@@ -1,0 +1,13 @@
+test_duplicate_sku_lines_cannot_oversell_aggregate_stock (test_commerce.CommerceInvariants.test_duplicate_sku_lines_cannot_oversell_aggregate_stock) ... ok
+test_duplicate_sku_lines_matching_aggregate_stock_are_accepted (test_commerce.CommerceInvariants.test_duplicate_sku_lines_matching_aggregate_stock_are_accepted) ... ok
+test_forged_or_cross_tenant_webhook_is_rejected (test_commerce.CommerceInvariants.test_forged_or_cross_tenant_webhook_is_rejected) ... ok
+test_order_reservation_is_all_or_nothing (test_commerce.CommerceInvariants.test_order_reservation_is_all_or_nothing) ... ok
+test_payment_signature_and_idempotency (test_commerce.CommerceInvariants.test_payment_signature_and_idempotency) ... ok
+test_role_required_and_cancel_restores_reserved_stock (test_commerce.CommerceInvariants.test_role_required_and_cancel_restores_reserved_stock) ... ok
+test_tenant_scoped_product_lookup_and_order_access (test_commerce.CommerceInvariants.test_tenant_scoped_product_lookup_and_order_access) ... ok
+test_total_uses_server_side_catalog_price (test_commerce.CommerceInvariants.test_total_uses_server_side_catalog_price) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.001s
+
+OK

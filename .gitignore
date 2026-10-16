@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+
+# Phase J fixture is its own independent git repository (disposable
+# synthetic-commerce acceptance project); it is intentionally not vendored
+# into this repo's history as a gitlink or submodule.
+/evaluation/fixtures/synthetic-commerce/
+/evaluation/fixtures/phase-a-live-setup/
