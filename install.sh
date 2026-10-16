@@ -63,9 +63,10 @@ fi
 [[ "$GLOBAL_INSTALL" == 0 || "$TARGET_EXPLICIT" == 0 ]] || {
   echo "--global cannot be combined with --target" >&2; exit 2;
 }
-[[ "$REF" =~ ^[A-Za-z0-9._/-]+$ && "$REF" != -* && "$REF" != *..* ]] || {
-  echo "invalid GitHub ref" >&2; exit 2;
-}
+case "$REF" in
+  ""|-*|*..*|*[!a-zA-Z0-9._/-]*)
+    echo "invalid GitHub ref: $REF" >&2; exit 2 ;;
+esac
 
 command -v curl >/dev/null || { echo "curl is required" >&2; exit 2; }
 command -v tar >/dev/null || { echo "tar is required" >&2; exit 2; }
